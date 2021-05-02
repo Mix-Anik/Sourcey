@@ -1,0 +1,77 @@
+{
+  "General": {
+    "token": "discord bot application token",
+    "prefix": "~",
+    "database": {
+      "name": "database name",
+      "host": "database host address",
+      "port": "database host port",
+      "user": "database user name",
+      "pass": "database user password"
+    }
+  },
+
+  "Modules": {
+    "Info": "ON",
+    "Misc": "ON",
+    "Roles": "ON",
+    "Monitoring": {
+      "c2d": "OFF",
+      "server": "ON",
+      "vk": "OFF",
+      "twitch": "ON"
+    }
+  },
+
+  "Info": {
+
+  },
+
+  "Misc": {
+    "Embeds": {
+      "messageColor": "#73ffd9",
+      "footerText": "embed message footer text",
+      "footerImage": "https://sun1-94.userapi.com/BZmuoR2O5ce608MObDTTCAmFktsXZrkq5e1_pQ/YjQ8dI6KQOY.jpg"
+    }
+  },
+
+  "Monitoring": {
+    "c2d": {
+      "channelId": "disord channel id",
+      "socketPort": "50000",
+      "serverIp": "game server ip address",
+      "secret": "phrase/combination to secure requests",
+      "color": "#8add80"
+    },
+    "server": {
+      "updateTime": 15000,
+      "serverIp": "game server ip address",
+      "serverPort": "game server port",
+      "messageColor": "#0099ff",
+      "projectWebsite": "link to website",
+      "messageAuthor": "embed message author name",
+      "authorImage": "https://sun9-19.userapi.com/c856028/v856028362/18fa84/sDRumNja2fQ.jpg?ava=1",
+      "thumbImage": "https://sun9-19.userapi.com/c856028/v856028362/18fa84/sDRumNja2fQ.jpg?ava=1",
+      "footerText": "embed message footer text",
+      "footerImage": "https://sun9-19.userapi.com/c856028/v856028362/18fa84/sDRumNja2fQ.jpg?ava=1"
+    },
+    "VK": {
+      "updateTime": 30000,
+      "groupId": "vk group id",
+      "accessToken": "application access token",
+      "postsToCheck": 3,
+      "ownerOnly": 1,
+      "channelId": "disord channel id",
+      "messageColor": "#9828fb"
+    },
+    "twitch": {
+      "updateTime": 10000,
+      "clientId": "twitch application client id",
+      "channelId": "disord channel id",
+      "messageColor": "#6600c1",
+      "authorImage": "https://static.twitchcdn.net/assets/favicon-32-d6025c14e900565d6177.png",
+      "footerText": "embed message footer text",
+      "footerImage": "https://static.twitchcdn.net/assets/favicon-32-d6025c14e900565d6177.png"
+    }
+  }
+}

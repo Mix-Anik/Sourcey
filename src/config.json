@@ -1,0 +1,91 @@
+{
+  "General": {
+    "token": "Njg1NTMwNTA3MTc3NzU0Nzk4.XxMlPw.HkvdOrv6977l_HxOt-iHKpaxm2s",
+    "prefix": "~",
+    "guildId": "483607212632178705",
+    "database": {
+      "name": "discord_db",
+      "host": "127.0.0.1",
+      "port": 5432,
+      "user": "postgres",
+      "pass": "postgres"
+    }
+  },
+
+  "Modules": {
+    "Info": "ON",
+    "Misc": "ON",
+    "Roles": "ON",
+    "Monitoring": "ON"
+  },
+
+  "Info": {
+
+  },
+
+  "Misc": {
+    "Embeds": {
+      "messageColor": "#73ffd9",
+      "footerText": "Отправлено",
+      "footerImage": "https://sun1-94.userapi.com/BZmuoR2O5ce608MObDTTCAmFktsXZrkq5e1_pQ/YjQ8dI6KQOY.jpg"
+    },
+    "Osu": {
+      "apikey": "adfd4c3916273ff470f2a2c2346b0925c6f1a547",
+      "messageColor": "#c62dff"
+    },
+    "Emoji": {
+      "roleId": "797596074490593309",
+      "webhookId": "797869945370312774",
+      "webhookToken": "9pzrhlr0j4TmwBTIiarpcPvrR-f_NSKOMXlvXdrPXkUBZRtjo8sI2MV-8KzgWXkUOzag"
+    }
+  },
+
+  "Monitoring": {
+    "c2d": {
+      "channelId": "664314805506801674",
+      "socketPort": 50000,
+      "serverIp": "195.211.102.44",
+      "secret": "4dg9TDKXvcFADr95Mu89dVe37fTPbujV",
+      "color": "#8add80"
+    },
+    "server": {
+      "updateTime": 15000,
+      "serverIp": "195.211.102.44",
+      "serverPort": "27056",
+      "messageColor": "#0099ff",
+      "projectWebsite": "https://vk.com/mv220v",
+      "messageAuthor": "Megavolt220v",
+      "authorImage": "https://sun9-19.userapi.com/c856028/v856028362/18fa84/sDRumNja2fQ.jpg?ava=1",
+      "thumbImage": "https://sun9-19.userapi.com/c856028/v856028362/18fa84/sDRumNja2fQ.jpg?ava=1",
+      "footerText": "Megavolt220v",
+      "footerImage": "https://sun9-19.userapi.com/c856028/v856028362/18fa84/sDRumNja2fQ.jpg?ava=1"
+    },
+    "VK": {
+      "updateTime": 30000,
+      "groupId": "85643291",
+      "accessToken": "cfd66eeacfd66eeacfd66eea47cfb9f026ccfd6cfd66eea919727c2a2bd8db797427940",
+      "postsToCheck": 3,
+      "ownerOnly": true,
+      "channelId": "679038093071745086",
+      "messageColor": "#9828fb"
+    },
+    "twitch": {
+      "updateTime": 30000,
+      "clientId": "hcnmhhpp7uuw6itll65spq85nxtfb5",
+      "channelId": "679038093071745086",
+      "messageColor": "#6600c1",
+      "authorImage": "https://static.twitchcdn.net/assets/favicon-32-d6025c14e900565d6177.png",
+      "footerText": "Twitch",
+      "footerImage": "https://static.twitchcdn.net/assets/favicon-32-d6025c14e900565d6177.png"
+    },
+    "youtube": {
+      "updateTime": 10000,
+      "apikey": "AIzaSyCCCsK9vfpnvjYGoXGUbG3r0SpCJJLH8Vc",
+      "channelId": "679038093071745086",
+      "messageColor": "#a70000",
+      "authorImage": "https://www.gstatic.com/youtube/img/branding/favicon/favicon_144x144.png",
+      "footerText": "Twitch",
+      "footerImage": "https://www.gstatic.com/youtube/img/branding/favicon/favicon_144x144.png"
+    }
+  }
+}

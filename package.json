@@ -1,0 +1,46 @@
+{
+  "name": "sourcey",
+  "version": "1.2.0",
+  "description": "Discord bot, made for game projects",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/index.ts",
+    "test": "nodemon src/test.ts",
+    "check": "tslint -p src/tsconfig.json",
+    "build": "tsc -p src/tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mix-Anik/Sourcey.git"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "gaming"
+  ],
+  "author": "Mixanik",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mix-Anik/Sourcey/issues"
+  },
+  "homepage": "https://github.com/Mix-Anik/Sourcey#readme",
+  "dependencies": {
+    "axios": "0.21.1",
+    "discord.js": "12.5.1",
+    "gamedig": "2.0.23",
+    "node-osu": "2.2.1",
+    "pg": "8.6.0",
+    "request": "2.88.2",
+    "twitch-api-v5": "2.0.4",
+    "vk-easy": "^1.4.1"
+  },
+  "devDependencies": {
+    "@types/gamedig": "2.0.1",
+    "@types/node": "14.14.20",
+    "@types/pg": "7.14.11",
+    "@types/request": "2.48.5",
+    "ts-node": "9.1.1",
+    "tslint": "6.1.3",
+    "typescript": "4.1.3"
+  }
+}

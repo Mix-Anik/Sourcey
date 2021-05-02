@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "target": "es2018",
+    "module": "commonjs",
+    "baseUrl": "./",
+    "rootDir": "./src",
+    "outDir": "./dist/out-tsc",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "sourceMap": false,
+    "esModuleInterop": true,
+    "declaration": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "noImplicitAny": true,
+    "noFallthroughCasesInSwitch": true,
+    "downlevelIteration": true,
+    "importHelpers": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "es2017.object",
+      "es2015",
+      "es2017"
+    ]
+  },
+  "types": [
+    "node"
+  ],
+  "typeRoots": [
+    "node_modules/@types",
+    "src"
+  ],
+  "files": [
+    "node_modules/@types/node/index.d.ts",
+    "src/typings.d.ts"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
