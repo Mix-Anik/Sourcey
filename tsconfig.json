@@ -9,10 +9,10 @@
     "resolveJsonModule": true,
     "sourceMap": false,
     "esModuleInterop": true,
-    "declaration": true,
+    "declaration": false,
     "strict": true,
     "noImplicitReturns": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "noFallthroughCasesInSwitch": true,
     "downlevelIteration": true,
     "importHelpers": true,
@@ -31,13 +31,19 @@
     "src"
   ],
   "files": [
-    "node_modules/@types/node/index.d.ts",
-    "src/typings.d.ts"
+    "node_modules/@types/node/index.d.ts"
   ],
   "include": [
     "src/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist/**/*",
+    "tests/**/*",
+    "coverage/**/*",
+    "jest.config.ts",
+    "LICENSE",
+    "README.md",
+    ".gitignore"
   ]
 }

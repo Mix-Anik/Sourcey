@@ -1,19 +1,31 @@
-import req from 'request'
+import axios, {AxiosRequestConfig} from 'axios'
 import {MessageEmbed, TextChannel} from 'discord.js'
-import {client, postgre} from '../index'
+import {client, postgre} from '../app'
 import config from '../config.json'
 
 
 export class TwitchResource {
-	clientId: string
+	private static _instance: TwitchResource | undefined
+	private readonly clientId: string
 
-	constructor(clientId: string) {
-		this.clientId = clientId
+	private constructor() {
+		this.clientId = config.Monitoring.twitch.clientId
 	}
 
-	getUsersByNames(names: string) {
-		const options = {
-			url: 'https://api.twitch.tv/kraken/users?login=' + names,
+	public static instance() {
+		if (this._instance === undefined)
+			this._instance = new TwitchResource()
+
+		return this._instance
+	}
+
+	public getUsersByNames(names: string) {
+		const options: AxiosRequestConfig = {
+			method: 'GET',
+			url: 'https://api.twitch.tv/kraken/users',
+			params: {
+				login: names
+			},
 			headers: {
 				'Accept': 'application/vnd.twitchtv.v5+json',
 				'Client-ID': this.clientId
@@ -21,16 +33,16 @@ export class TwitchResource {
 		}
 
 		return new Promise((resolve, reject) => {
-			req(options, (error, response, body) => {
-				if (error) reject(error)
-				else resolve(JSON.parse(body))
-			})
+			axios(options)
+				.then(res => resolve(res.data))
+				.catch(err => reject(err))
 		})
 	}
 
-	getChannelById(channelId: string) {
-		const options = {
-			url: 'https://api.twitch.tv/kraken/channels/' + channelId,
+	public getChannelById(channelId: string) {
+		const options: AxiosRequestConfig = {
+			method: 'GET',
+			url: `https://api.twitch.tv/kraken/channels/${channelId}`,
 			headers: {
 				'Accept': 'application/vnd.twitchtv.v5+json',
 				'Client-ID': this.clientId
@@ -38,16 +50,15 @@ export class TwitchResource {
 		}
 
 		return new Promise((resolve, reject) => {
-			req(options, (error, response, body) => {
-				if (error) reject(error)
-				else resolve(JSON.parse(body))
-			})
+			axios(options)
+				.then(res => resolve(res.data))
+				.catch(err => reject(err))
 		})
 	}
 
-	getStreamInfo(channelId: string) {
-		const options = {
-			url: 'https://api.twitch.tv/kraken/streams/' + channelId,
+	public getStreamInfo(channelId: string) {
+		const options: AxiosRequestConfig = {
+			url: `https://api.twitch.tv/kraken/streams/${channelId}`,
 			headers: {
 				'Accept': 'application/vnd.twitchtv.v5+json',
 				'Client-ID': this.clientId
@@ -55,15 +66,14 @@ export class TwitchResource {
 		}
 
 		return new Promise((resolve, reject) => {
-			req(options, (error, response, body) => {
-				if (error) reject(error)
-				else resolve(JSON.parse(body))
-			})
+			axios(options)
+				.then(res => resolve(res.data))
+				.catch(err => reject(err))
 		})
 	}
 
 	// Checks for twitch users being streaming
-	listen() {
+	public listen() {
 		setInterval(async () => {
 			const twitchUsers: any = await postgre.getTwitchUsers()
 
@@ -77,11 +87,11 @@ export class TwitchResource {
 							.setColor(config.Monitoring.twitch.messageColor)
 							.setTitle(streamInfo.stream.channel.url)
 							.setURL(streamInfo.stream.channel.url)
-							.setAuthor(streamInfo.stream.channel.display_name + " is now streaming!", config.Monitoring.twitch.authorImage, streamInfo.stream.channel.url)
-							.addField("Description:", streamInfo.stream.channel.status)
-							.addField("Playing:", streamInfo.stream.game, true)
-							.addField("Viewers:", streamInfo.stream.viewers, true)
-							.addField("Language:", streamInfo.stream.channel.language, true)
+							.setAuthor(streamInfo.stream.channel.display_name + ' is now streaming!', config.Monitoring.twitch.authorImage, streamInfo.stream.channel.url)
+							.addField('Description:', streamInfo.stream.channel.status)
+							.addField('Playing:', streamInfo.stream.game, true)
+							.addField('Viewers:', streamInfo.stream.viewers, true)
+							.addField('Language:', streamInfo.stream.channel.language, true)
 							.setThumbnail(streamInfo.stream.channel.logo)
 							.setImage(streamInfo.stream.preview.large)
 							.setTimestamp()
