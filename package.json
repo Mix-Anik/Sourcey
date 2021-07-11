@@ -1,13 +1,16 @@
 {
   "name": "sourcey",
-  "version": "1.2.0",
-  "description": "Discord bot, made for game projects",
+  "version": "1.3.0",
+  "description": "Discord bot, made for game projects, especially based on Source Engine",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index.ts",
-    "test": "nodemon src/test.ts",
+    "start": "nodemon src/app.ts",
+    "test": "jest -c jest.config.ts",
+    "test -cc": "jest --coverage -c jest.config.ts",
     "check": "tslint -p src/tsconfig.json",
-    "build": "tsc -p src/tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "bundle": "tsc-bundle tsconfig.json --outFile dist/app.js",
+    "debug": "node --inspect --require ts-node/register src/app.ts"
   },
   "repository": {
     "type": "git",
@@ -16,7 +19,12 @@
   "keywords": [
     "discord",
     "bot",
-    "gaming"
+    "gaming",
+    "source engine",
+    "SE",
+    "css",
+    "csgo",
+    "counter-strike"
   ],
   "author": "Mixanik",
   "license": "ISC",
@@ -25,22 +33,29 @@
   },
   "homepage": "https://github.com/Mix-Anik/Sourcey#readme",
   "dependencies": {
+    "@iamtraction/google-translate": "github:iamtraction/google-translate",
     "axios": "0.21.1",
-    "discord.js": "12.5.1",
+    "discord-buttons": "^4.0.0",
+    "discord.js": "^12.5.3",
     "gamedig": "2.0.23",
+    "ms": "^2.1.3",
     "node-osu": "2.2.1",
     "pg": "8.6.0",
-    "request": "2.88.2",
-    "twitch-api-v5": "2.0.4",
     "vk-easy": "^1.4.1"
   },
   "devDependencies": {
     "@types/gamedig": "2.0.1",
+    "@types/jest": "^26.0.23",
+    "@types/ms": "^0.7.31",
     "@types/node": "14.14.20",
     "@types/pg": "7.14.11",
     "@types/request": "2.48.5",
-    "ts-node": "9.1.1",
+    "@types/ws": "^7.4.6",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.3",
+    "ts-node": "^9.1.1",
     "tslint": "6.1.3",
-    "typescript": "4.1.3"
+    "typescript": "4.1.3",
+    "typescript-bundle": "^1.0.17"
   }
 }

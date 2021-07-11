@@ -13,6 +13,7 @@ export class Dict {
 	 * Returns key value or default value if key doesn't exist
 	 * @param {string} key - key to find value for
 	 * @param {any} defaultValue - value to return if key wasn't found
+	 * @returns {any}
 	 */
 	public get(key: string, defaultValue: any = null): any {
 		return (key in this.keyValues) ? this.keyValues[key] : defaultValue
@@ -28,12 +29,35 @@ export class Dict {
 	}
 
 	/**
+	 * Returns whether key exists or not
+	 * @param {string} key - key to search for
+	 * @returns {boolean}
+	 */
+	public has(key: string): boolean {
+		return (key in this.keyValues)
+	}
+
+	/**
 	 * Returns key value and removes it from Dict instance
 	 * @param {string} key - key to find value for
+	 * @returns {any}
 	 */
-	public pop(key: string) {
-		const value = this.get(key)
-		delete this.keyValues[key]
-		return value
+	public pop(key: string): any {
+		let poppedValue = null
+
+		if (this.has(key)) {
+			poppedValue = this.get(key)
+			delete this.keyValues[key]
+		}
+
+		return poppedValue
+	}
+
+	/**
+	 * Returns values
+	 * @returns {Array}
+	 */
+	public values(): any[] {
+		return Object.values(this.keyValues)
 	}
 }

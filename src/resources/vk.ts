@@ -1,18 +1,26 @@
 // @ts-ignore
 import vkapi from 'vk-easy'
 import {MessageEmbed, TextChannel} from 'discord.js'
-import {client, postgre} from '../index'
+import {client, postgre} from '../app'
 import config from '../config.json'
 
 
 export class VkResource {
-	accessToken: string
+	private static _instance: VkResource | undefined
+	private readonly accessToken: string
 
-	constructor(token: string) {
-		this.accessToken = token
+	private constructor() {
+		this.accessToken = config.Monitoring.VK.accessToken
 	}
 
-	getGroupInfo(id: string) {
+	public static instance() {
+		if (this._instance === undefined)
+			this._instance = new VkResource()
+
+		return this._instance
+	}
+
+	public getGroupInfo(id: string) {
 		return vkapi('groups.getById', {
 			group_id: id,
 			v: '5.62',
@@ -20,7 +28,7 @@ export class VkResource {
 		})
 	}
 
-	getUserInfo(id: string) {
+	public getUserInfo(id: string) {
 		return vkapi('users.get', {
 			user_id: id,
 			fields: 'photo_200',
@@ -29,7 +37,7 @@ export class VkResource {
 		})
 	}
 
-	checkPosts(groupId: string, postsToCheck: number = 10, ownerOnly: boolean = true, lastId: number = -1) {
+	public checkPosts(groupId: string, postsToCheck: number = 10, ownerOnly: boolean = true, lastId: number = -1) {
 		return vkapi('wall.get', {
 			owner_id: '-' + groupId,
 			count: postsToCheck,
@@ -38,12 +46,12 @@ export class VkResource {
 			access_token: this.accessToken
 		}).then(async (postsData: any) => {
 			const posts = postsData.response.items
-			const newPosts = []
+			const newPosts: any = []
 			let newLastId = lastId
 
 			for (const post of posts) {
 				const signer = (post.hasOwnProperty('signer_id') ? await this.getUserInfo(post.signer_id) : false)
-				const signerName = (signer === false ? false : signer.response[0].first_name + " " + signer.response[0].last_name)
+				const signerName = (signer === false ? false : signer.response[0].first_name + ' ' + signer.response[0].last_name)
 				const signerPhoto = (signer === false ? false : signer.response[0].photo_200)
 
 				if (lastId < post.id) {
@@ -69,7 +77,7 @@ export class VkResource {
 	}
 
 	// Updates VK group's last post ids in database
-	updateGroup(groupId: string, newId: string) {
+	public updateGroup(groupId: string, newId: string) {
 
 		const found = postgre.checkGroup(groupId)
 
@@ -85,7 +93,7 @@ export class VkResource {
 	}
 
 	// Function, which posts latest project posts from VK
-	listen() {
+	public listen() {
 		setInterval(async () => {
 			const currentLastId = await postgre.getGroupLast(config.Monitoring.VK.groupId)
 
