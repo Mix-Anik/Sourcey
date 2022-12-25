@@ -26,12 +26,12 @@ export abstract class EventBase {
 	/**
 	 * event call handler
 	 */
-	public call(...args): void {
+	public call(...args: any[]): void {
 		this.lastCalled = Date.now()
 		this.execute(args)
 	}
 
-	public abstract execute(...args): Promise<void>
+	public abstract execute(...args: any[]): Promise<void>
 
 	public docs(): string {
 		return '```\n' +

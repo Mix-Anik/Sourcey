@@ -12,7 +12,9 @@
         "no-console": false,
         "no-var-requires": false,
         "semicolon": [true, "never"],
-        "quotemark": [true, "single"]
+        "quotemark": [true, "single"],
+        "max-classes-per-file": false,
+        "max-line-length": [true, 140]
     },
     "rulesDirectory": [],
     "linterOptions": {}

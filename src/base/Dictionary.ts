@@ -54,6 +54,16 @@ export class Dict {
 	}
 
 	/**
+	 * Removes key value from Dict instance
+	 * @param {string} key - key to remove key value for
+	 */
+	public remove(key: string): void {
+		if (this.has(key)) {
+			delete this.keyValues[key]
+		}
+	}
+
+	/**
 	 * Returns values
 	 * @returns {Array}
 	 */

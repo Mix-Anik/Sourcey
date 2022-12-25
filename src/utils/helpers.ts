@@ -103,3 +103,41 @@ export function getAllFiles(directory: string): string[] {
 
 	return files
 }
+
+// Returns current local datetime
+export function getCurrentTime(): string {
+	const now = new Date()
+	const day = nPad(now.getDay(), 2)
+	const month = nPad(now.getMonth(), 2)
+	const year = nPad(now.getFullYear(), 2)
+	const h = nPad(now.getHours(), 2)
+	const min = nPad(now.getMinutes(), 2)
+	const sec = nPad(now.getSeconds(), 2)
+	const ms = nPad(now.getMilliseconds(), 3)
+
+	return `${day}/${month}/${year} ${h}:${min}:${sec}.${ms}`
+}
+
+// pads number with zeros
+export function nPad(num: number, length: number): string {
+	return num.toString().padStart(length, '0')
+}
+
+// Checks if passed text is a channel mention
+export function isChannelMention(text: string): boolean {
+	return /<#\d+>/.test(text)
+}
+
+// Truncates string to given length
+export function truncate(text: string, len: number) {
+  if (text.length <= len) {
+    return text
+  }
+
+  return text.slice(0, len) + '...'
+}
+
+// Clamps number to given interval
+export function clamp(num: number, min: number, max: number) {
+	return (num < min) ? min : ((num > max) ? max : num)
+}

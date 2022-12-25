@@ -1,6 +1,5 @@
 import {CommandBase} from '../../base/CommandBase'
 import {Dict} from '../../base/Dictionary'
-import {postgre} from '../../app'
 import {Message, Permissions} from 'discord.js'
 import {TwitchResource} from '../../resources/twitch'
 
@@ -10,7 +9,7 @@ const attributes = new Dict({
 	minArgs: 2,
 	maxArgs: 2,
 	description: 'Adds twitch channel to monitoring',
-	usage: 'twitch <add/remove> <channel link/name>',
+	usage: 'twitch <add|remove> <channel link/name>',
 	permissions: [Permissions.FLAGS.ADMINISTRATOR],
 	module: 'MONITORING'
 })
@@ -30,7 +29,7 @@ export const instance = new class extends CommandBase {
 						'stream_status': 'offline'
 					}
 
-					postgre.addTwitchUser(user)
+					// postgre.addTwitchUser(user)
 
 					message.channel.send(`Twitch user '${channelName} was successfully added!`).then(msg => {
 						msg.delete({timeout: 2000})
@@ -42,7 +41,7 @@ export const instance = new class extends CommandBase {
 				}
 			})
 		} else if (action === 'remove') {
-			postgre.deleteTwitchUser(channelName)
+			// postgre.deleteTwitchUser(channelName)
 
 			message.channel.send('Done!').then(msg => {
 				msg.delete({timeout: 2000})

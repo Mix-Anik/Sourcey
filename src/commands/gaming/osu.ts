@@ -2,7 +2,7 @@ import {CommandBase} from '../../base/CommandBase'
 import {Dict} from '../../base/Dictionary'
 import {Message, MessageEmbed} from 'discord.js'
 import {OsuResource} from '../../resources/osu'
-import config from '../../config.json'
+import {GuildConfigResource} from '../../resources/config'
 
 
 const attributes = new Dict({
@@ -17,17 +17,18 @@ const attributes = new Dict({
 
 export const instance = new class extends CommandBase {
 	execute(message: Message, [playerName]: [string]): void {
+		const configResource = GuildConfigResource.instance()
+		const guildConfig = configResource.get(message.guild.id).keyValues
 		const osu = OsuResource.instance()
 
 		osu.getPlayerStats(playerName).then(data => {
 			const embed = new MessageEmbed()
+				.setColor(guildConfig.Modules.MISC.embedColor)
 			if (!data) {
 				embed
-					.setColor(config.Misc.Osu.messageColor)
 					.setAuthor('Could not retrieve data, try later!')
 			} else {
 				embed
-					.setColor(config.Misc.Osu.messageColor)
 					.setAuthor(playerName + '\'s Profile', data.profileImage, data.profileLink)
 					.addField('**Register Date:**', data.regDate, true)
 					.addField('**Country:**', ':flag_' + data.userData.country.toLowerCase() + ':', true)

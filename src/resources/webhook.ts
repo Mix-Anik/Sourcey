@@ -1,5 +1,5 @@
 import {TextChannel, Webhook} from 'discord.js'
-import config from '../config.json'
+import {GuildConfigResource} from './config'
 
 /**
  * Retrieves guild webhook or creates it
@@ -9,17 +9,20 @@ export class WebhookResource {
 
   private constructor() {}
 
-  public static async instance(channel: TextChannel): Promise<Webhook> {
+  public static async instance(guildId: string, channel: TextChannel): Promise<Webhook> {
   	return new Promise( async (resolve, reject) => {
   		if (this._instance === undefined) {
+  			const configResource = GuildConfigResource.instance()
+				const guildConfigEntity = configResource.get(guildId)
   			const guildWebHooks = await channel.guild.fetchWebhooks()
-				const botWebHook = guildWebHooks.get(config.Webhook.id)
+				const botWebHook = guildWebHooks.get(guildConfigEntity.keyValues.Webhook.id)
 
 				if (botWebHook) {
 					this._instance = botWebHook
 				} else {
 					const newWebhook = await channel.createWebhook('Sourcey')
-					config.Webhook.id = newWebhook.id
+					guildConfigEntity.keyValues.Webhook.id = newWebhook.id
+					await configResource.update(guildId, guildConfigEntity)
 					this._instance = newWebhook
 				}
 			}

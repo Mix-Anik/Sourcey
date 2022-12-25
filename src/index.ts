@@ -5,5 +5,5 @@ import {Logger} from './utils/logging'
 
 const manager = new ShardingManager('src/app.ts', { token: config.General.token })
 
-manager.on('shardCreate', shard => Logger.info(`Launched shard ${shard.id}`, true))
+manager.on('shardCreate', shard => Logger.internalLog(`Launched shard ${shard.id}`, true))
 manager.spawn()

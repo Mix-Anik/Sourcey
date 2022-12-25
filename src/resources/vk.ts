@@ -1,8 +1,9 @@
 // @ts-ignore
 import vkapi from 'vk-easy'
 import {MessageEmbed, TextChannel} from 'discord.js'
-import {client, postgre} from '../app'
+import {client} from '../app'
 import config from '../config.json'
+import {GuildConfigResource} from "./config";
 
 
 export class VkResource {
@@ -10,7 +11,7 @@ export class VkResource {
 	private readonly accessToken: string
 
 	private constructor() {
-		this.accessToken = config.Monitoring.VK.accessToken
+		this.accessToken = config.Resources.vk.accessToken
 	}
 
 	public static instance() {
@@ -79,32 +80,35 @@ export class VkResource {
 	// Updates VK group's last post ids in database
 	public updateGroup(groupId: string, newId: string) {
 
-		const found = postgre.checkGroup(groupId)
-
-		found.then((isFound) => {
-			const data = {
-				group_id: groupId,
-				last_post_id: newId
-			}
-
-			if (isFound) postgre.updateGroup(data)
-			else postgre.addGroup(data)
-		})
+		// const found = postgre.checkGroup(groupId)
+		//
+		// found.then((isFound) => {
+		// 	const data = {
+		// 		group_id: groupId,
+		// 		last_post_id: newId
+		// 	}
+		//
+		// 	if (isFound) postgre.updateGroup(data)
+		// 	else postgre.addGroup(data)
+		// })
 	}
 
 	// Function, which posts latest project posts from VK
-	public listen() {
+	public listen(guildId: string) {
+		const configResource = GuildConfigResource.instance()
+		const guildConfig = configResource.get(guildId).keyValues
+
 		setInterval(async () => {
-			const currentLastId = await postgre.getGroupLast(config.Monitoring.VK.groupId)
+			const currentLastId = 12345// await postgre.getGroupLast(config.Monitoring.VK.groupId)
 
 			// Getting posts we haven't posted in discord yet
-			const response = await this.checkPosts(config.Monitoring.VK.groupId,
-				config.Monitoring.VK.postsToCheck,
-				config.Monitoring.VK.ownerOnly,
+			const response = await this.checkPosts(guildConfig.Modules.MONITORING.vk.groupId,
+				guildConfig.Modules.MONITORING.vk.postsToCheck,
+				guildConfig.Modules.MONITORING.vk.ownerOnly,
 				currentLastId)
 
 			if (response.posts.length > 0) {
-				const groupData = await this.getGroupInfo(config.Monitoring.VK.groupId)
+				const groupData = await this.getGroupInfo(guildConfig.Modules.MONITORING.vk.groupId)
 				const groupInfo = groupData.response[0]
 				const posts = response.posts.reverse()
 
@@ -115,7 +119,7 @@ export class VkResource {
 
 					// Creating discord embed message & sending it
 					const embed = new MessageEmbed()
-						.setColor(config.Monitoring.VK.messageColor)
+						.setColor(guildConfig.Modules.MONITORING.embedColor)
 						.setTitle(groupInfo.name)
 						.setURL(groupLink)
 						.setAuthor(author, authorPhoto, groupLink)
@@ -124,15 +128,15 @@ export class VkResource {
 						.setTimestamp()
 						.setFooter(author, authorPhoto)
 
-					const discordChannel = <TextChannel> client.channels.cache.get(config.Monitoring.VK.channelId)
+					const discordChannel = <TextChannel> client.channels.cache.get(guildConfig.Modules.MONITORING.vk.channelId)
 					await discordChannel.send(embed)
 				}
 
 				// Changing lastID to the one we have posted last and saving it in database
 				if (currentLastId < response.lastID) {
-					this.updateGroup(config.Monitoring.VK.groupId, response.lastID)
+					this.updateGroup(guildConfig.Modules.MONITORING.vk.groupId, response.lastID)
 				}
 			}
-		}, config.Monitoring.VK.updateTime)
+		}, guildConfig.Modules.MONITORING.vk.updateTime)
 	}
 }

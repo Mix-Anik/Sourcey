@@ -26,7 +26,7 @@ export const instance = new class extends CommandBase {
 
 			translate(text, options).then(res => {
 				message.channel.send(`Translation: **${res.text}**`)
-			}).catch(err => Logger.error(`Failed to translate due to '${err}'`, true))
+			}).catch(err => Logger.error(message.guild.id, `Failed to translate due to '${err}'`, true))
 		} else {
 			message.channel.send(`Unknown language: '${langFrom}' or '${langTo}'`)
 		}

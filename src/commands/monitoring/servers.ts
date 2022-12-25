@@ -1,41 +1,50 @@
 import {CommandBase} from '../../base/CommandBase'
 import {Dict} from '../../base/Dictionary'
-import {Message, MessageEmbed, Permissions} from 'discord.js'
-import config from '../../config.json'
-import {isEmpty, sec2time} from '../../utils/helpers'
-import {ServerInfoResource} from '../../resources/serverinfo'
+import {Message, Permissions, TextChannel} from 'discord.js'
+import {isChannelMention} from '../../utils/helpers'
+import {ServersReporterResource} from '../../resources/serversReporter'
+import {ServersReporter} from '../../base/models/serversReporter.model'
 
 
 const attributes = new Dict({
 	name: 'servers',
-	minArgs: 3,
-	maxArgs: 4,
-	description: 'Shows single or list of servers info',
-	usage: 'servers <add/remove> <ip> <game> <group>',
+	minArgs: 2,
+	maxArgs: 5,
+	description: 'Shows info about list of servers or single server',
+	usage: '\nservers create <channel> "<title>" <icon url?>' +
+				 '\nservers <add/remove> <channel> <msg id> <full ip> <game>' +
+				 '\nservers delete <channel> <msg id>',
 	permissions: [Permissions.FLAGS.ADMINISTRATOR],
 	module: 'MONITORING'
 })
 
 export const instance = new class extends CommandBase {
-	execute(message: Message, [action, fullIP, game, group]: any[]): void {
-		if (action === 'add') {
-			const ip = fullIP.split(':')[0]
-			const port = parseInt(fullIP.split(':')[1], 10)
-			const loadingMsg = new MessageEmbed()
-				.setColor(config.Monitoring.server.messageColor)
-				.setTitle('Loading...')
+	async execute(message: Message, [action, mention, ...args]: any[]): Promise<void> {
+		const mentionedChannels = message.mentions.channels
 
-			message.channel.send(loadingMsg).then(async (newMessage: Message) => {
-				setInterval(async () => {
-					const embed = await this.composeEmbed(ip, port, game)
+		if (!mentionedChannels.size || !isChannelMention(mention)) {
+			message.reply(`You have to pass a channel mention as command argument`)
+			return
+		}
 
-					newMessage.edit(embed)
-				}, config.Monitoring.server.updateTime)
-			})
+		const channel = mentionedChannels.first()
+
+		if (action === 'create') {
+			const reporter = await this.actionCreate(message.guild.id, mentionedChannels.first(), args)
+			message.channel.send(`Created new ServersReporter(${reporter.message.messageId}) in <#${channel.id}>`)
+		} else if (action === 'delete') {
+			await this.actionDelete(message.guild.id, channel, args)
+			message.channel.send(`Removed ServersReporter(${args[0]}) from <#${channel.id}>`)
+		} else if (action === 'add') {
+			const added = await this.actionAdd(message.guild.id, mentionedChannels.first(), args)
+
+			if (added) message.channel.send(`Added ${args[2]} server ${args[1]} to ServersReporter(${args[0]}) in <#${channel.id}>`)
+			else message.channel.send(`ServersReporter does not exist!`)
 		} else if (action === 'remove') {
-			message.channel.send(`Not implemented`).then((msg: Message) => {
-				msg.delete({timeout: 2000})
-			})
+			const removed = await this.actionRemove(message.guild.id, mentionedChannels.first(), args)
+
+			if (removed) message.channel.send(`Removed ${args[2]} server ${args[2]} from ServersReporter(${args[0]}) in <#${channel.id}>`)
+			else message.channel.send(`ServersReporter does not have such server!`)
 		} else {
 			message.channel.send(`Invalid action '${action}'`).then((msg: Message) => {
 				msg.delete({timeout: 2000})
@@ -43,50 +52,31 @@ export const instance = new class extends CommandBase {
 		}
 	}
 
-	async composeEmbed(ip: string, port: number, game: string): Promise<MessageEmbed> {
-		// Getting server information
-		const serverInfo = ServerInfoResource.instance()
-		const serverData = await serverInfo.getServerInfo(ip, port, game)
+	actionCreate(guildId: string, channel: TextChannel, [title, iconUrl]: any[]): Promise<ServersReporter> {
+		const serversReporterResource = ServersReporterResource.instance()
 
-		if (serverData.status === 'online') {
-			// Making up and embed with player list
-			let playersText = '```\n'
-			const embed = new MessageEmbed()
-				.setColor(config.Monitoring.server.messageColor)
-				.setTitle(serverData.serverName)
-				// .setURL(`steam://connect/${serverData.serverIP}`)
-				.addField('Players:',
-					`${serverData.players.length}(${serverData.bots.length})/${serverData.maxplayers}`,
-					true)
-				.addField('Map:', serverData.serverMap, true)
-			const maxNL = 15 // maximum player name length
-			const maxSL = 5 // maximum player score length
-			const gap = 5 // gap between player info fields
-			const blank = ' '
+		return serversReporterResource.create(guildId, channel.id, title, iconUrl)
+	}
 
-			// Parsing players' information
-			for (const player of serverData.players) {
-				if (isEmpty(player)) continue
+	actionDelete(guildId: string, channel: TextChannel, [messageId]: any[]): Promise<void> {
+		const serversReporterResource = ServersReporterResource.instance()
 
-				const name = player.name.length >= maxNL ? player.name.slice(0, 11) + '...' : player.name
-				const score = player.score > 9999 ? 9999 : player.score
-				const time = sec2time(player.time, 0, false)
-				const count1 = maxNL - name.length + gap
-				const count2 = maxSL - score.toString().length + gap
-				playersText += name + blank.repeat(count1) + score + blank.repeat(count2) + time + '\n'
-			}
+		return serversReporterResource.delete(guildId, messageId, channel.id)
+	}
 
-			playersText += '```'
-			embed
-				.addField(`steam://connect/${serverData.serverIP}`, playersText)
-				.setTimestamp()
-				.setFooter('', config.Monitoring.server.footerImage)
+	actionAdd(guildId: string, channel: TextChannel, [messageId, fullIp, game]: any[]): Promise<boolean> {
+		const serversReporterResource = ServersReporterResource.instance()
+		const ip = fullIp.split(':')[0]
+		const port = parseInt(fullIp.split(':')[1], 10)
 
-			return embed
-		} else {
-			return new MessageEmbed()
-			.setColor(config.Monitoring.server.messageColor)
-			.setTitle('Server is currently offline.')
-		}
+		return serversReporterResource.addServer(guildId, channel.id, messageId, ip, port, game)
+	}
+
+	actionRemove(guildId: string, channel: TextChannel, [messageId, fullIp, game]: any[]): Promise<boolean> {
+		const serversReporterResource = ServersReporterResource.instance()
+		const ip = fullIp.split(':')[0]
+		const port = parseInt(fullIp.split(':')[1], 10)
+
+		return serversReporterResource.removeServer(guildId, channel.id, messageId, ip, port, game)
 	}
 }(attributes)

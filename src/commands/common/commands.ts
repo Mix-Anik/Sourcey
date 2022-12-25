@@ -1,8 +1,8 @@
 import {CommandBase} from '../../base/CommandBase'
 import {Dict} from '../../base/Dictionary'
 import {Message, MessageEmbed} from 'discord.js'
-import config from '../../config.json'
 import {CommandHandler} from '../../app'
+import {GuildConfigResource} from '../../resources/config'
 
 
 const attributes = new Dict({
@@ -18,7 +18,9 @@ const attributes = new Dict({
 export const instance = new class extends CommandBase {
 	execute(message: Message, [module]: [string]): void {
 		module = module.toUpperCase()
-		const moduleNames = Object.keys(config.Modules)
+		const configResource = GuildConfigResource.instance()
+		const guildConfig = configResource.get(message.guild.id).keyValues
+		const moduleNames = Object.keys(guildConfig.Modules)
 		const commands: CommandBase[] = []
 
 		if (!moduleNames.includes(module)) {

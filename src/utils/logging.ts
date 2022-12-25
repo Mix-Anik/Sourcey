@@ -1,26 +1,48 @@
-import config from '../config.json'
 import {TextChannel} from 'discord.js'
 import {client} from '../app'
+import {GuildConfigResource} from '../resources/config'
+import config from '../config.json'
+import {getCurrentTime} from './helpers'
 
 
 export class Logger {
-	static info(message: any, ltd: boolean = false) {
-		const converted = `INFO: ${JSON.stringify(message)}`
-		process.stdout.write(converted + '\n')
+	static info(guildId: string, message: any, ltd: boolean = false) {
+		const msg = `INFO: ${JSON.stringify(message)}`
 
-		if (ltd) this.logToDiscord(converted)
+		this.guildLog(guildId, msg, ltd)
 	}
 
-	static error(message: any, ltd: boolean = false) {
-		const converted = `ERROR: ${JSON.stringify(message)}`
+	static error(guildId: string, message: any, ltd: boolean = true) {
+		const msg = `ERROR: ${JSON.stringify(message)}`
+
+		this.guildLog(guildId, msg, ltd)
+	}
+
+	static internalLog(message: any, ltd: boolean = false) {
+		const now = getCurrentTime()
+		const converted = `${now} | INTERNAL: ${JSON.stringify(message)}`
 		process.stderr.write(converted + '\n')
 
-		if (ltd) this.logToDiscord(converted)
+		if (ltd) this.logToDiscord(config.General.ownerGuildId, config.InternalLogger.channelId, converted)
 	}
 
-	static logToDiscord(message: string) {
-		const logsChannel = <TextChannel> client.channels.cache.get(config.Logger.channelId)
+	private static guildLog(guildId: string, msg: string, ltd: boolean = false) {
+		const configResource = GuildConfigResource.instance()
+		const guildConfig = configResource.get(guildId).keyValues
+		const now = getCurrentTime()
+		const converted = `${now} | ${msg}`
+		process.stderr.write(converted + '\n')
 
-		if (logsChannel) logsChannel.send(message)
+		if (ltd) this.logToDiscord(guildId, guildConfig.Logger.channelId, converted)
+	}
+
+	static logToDiscord(guildId: string, channelId: string, message: string) {
+		const guild = client.guilds.cache.get(guildId)
+
+		if (!guild) return
+
+		const logChannel = <TextChannel> guild.channels.cache.get(channelId)
+
+		if (logChannel) logChannel.send(message)
 	}
 }

@@ -1,7 +1,9 @@
 import {Dict} from './Dictionary'
-import config from '../config.json'
-import {Permissions, PermissionString} from 'discord.js'
+import {Message, Permissions, PermissionString} from 'discord.js'
 import {hasRoleByName} from '../utils/helpers'
+import {GuildConfigResource} from '../resources/config'
+import {CommandModule} from './interfaces/command'
+
 
 export abstract class CommandBase {
 	/**
@@ -21,11 +23,11 @@ export abstract class CommandBase {
 	public minArgs: number
 	public description: string
 	public usage: string
-	public permissions: PermissionString[]
+	public permissions: number[]
 	public role: string
-	public module: string
+	public module: CommandModule
 	public cooldown: number
-	public lastCalled: number
+	private lastCalled: number
 
 	/**
 	 * Create command
@@ -47,7 +49,7 @@ export abstract class CommandBase {
 	/**
 	 * command call handler
 	 */
-	public call(message: any, args: any[]): void {
+	public call(message: Message, args: any[]): void {
 		if (!message.member.hasPermission(this.permissions)) {
 			message.reply(`You are not permitted to run this command.`)
 			return
@@ -63,7 +65,7 @@ export abstract class CommandBase {
 			return
 		}
 
-		if (this.isDisabled()) {
+		if (this.isDisabled(message.guild.id)) {
 			message.reply(`${this.module} module commands are currently disabled.`)
 			return
 		}
@@ -74,31 +76,37 @@ export abstract class CommandBase {
 			return
 		}
 
+		// TODO: add automatic args conversion to given types
+		// TODO: For types: String, Number, Boolean, Array (for remainig)?
+
 		this.lastCalled = Date.now()
 		this.execute(message, args)
 	}
 
-	protected abstract execute(message: any, args: any[]): void
+	protected abstract execute(message: Message, args: any[]): void
 
 	public isCold(): boolean {
 		return this.lastCalled + (this.cooldown * 1000) < Date.now()
 	}
 
-	public isDisabled(): boolean {
-		if (!config.Modules.hasOwnProperty(this.module)) return true
+	public isDisabled(guildId: string): boolean {
+		const configResource = GuildConfigResource.instance()
+		const guildConfig = configResource.get(guildId).keyValues
 
-		return config.Modules[this.module] !== 'ON'
+		if (!guildConfig.Modules.hasOwnProperty(this.module)) return true
+
+		return !guildConfig.Modules[this.module].enabled
 	}
 
 	public docs(): string {
-		const stringPermsissions = JSON.stringify(this.permissions.map(
-			p => Object.keys(Permissions.FLAGS).find(key => Permissions.FLAGS[key] === p)
+		const stringPermissions = JSON.stringify(this.permissions.map(
+			p => Object.keys(Permissions.FLAGS).find((key: PermissionString) => Permissions.FLAGS[key] === p)
 		))
 
-		return '```\n' +
-			`Command: ${config.General.prefix + this.name} - ${this.description}\n` +
-			`Usage: ${config.General.prefix + this.usage}\n` +
-			`Permissions: ${stringPermsissions}\n` +
+		return '```autohotkey\n' +
+			`Command: ${this.name} - ${this.description}\n` +
+			`Usage: ${this.usage}\n` +
+			`Permissions: ${stringPermissions}\n` +
 			`Module: ${this.module}\n` +
 			(this.role ? `Required Role: ${this.role}\n` : '') +
 			`Cooldown: ${this.cooldown} seconds\n` +

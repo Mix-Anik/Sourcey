@@ -1,7 +1,8 @@
 import {CommandBase} from '../../base/CommandBase'
 import {Dict} from '../../base/Dictionary'
-import {postgre} from '../../app'
 import {Message, Permissions} from 'discord.js'
+import {Emoji} from '../../base/models/emoji.model'
+import {getRepository} from 'typeorm'
 
 
 const attributes: Dict = new Dict({
@@ -9,21 +10,24 @@ const attributes: Dict = new Dict({
 	minArgs: 2,
 	maxArgs: 3,
 	description: 'Nitro-Free Emojis manager',
-	usage: 'emoji <add/remove> <code> <snowflake>',
+	usage: 'emoji <add|remove> <code> <snowflake>',
 	permissions: [Permissions.FLAGS.ADMINISTRATOR],
 	module: 'MISC'
 })
 
 export const instance = new class extends CommandBase {
 	async execute(message: Message, [action, code, snowflake]: [string, string, string]): Promise<void> {
-		const emojiExists = await postgre.getEmoji(code)
+		const emojiRepository = getRepository(Emoji)
+		const existingEmoji = await emojiRepository.findOne({code: code})
 
 		if (action === 'add') {
-			if (!emojiExists) {
-				await postgre.addEmoji({
+			if (!existingEmoji) {
+				const newEmoji = emojiRepository.create({
+					guildId: message.guild.id,
 					code: code,
 					snowflake: snowflake
 				})
+				await newEmoji.save()
 
 				message.channel.send(`Emoji :${code}: was successfully added!`).then((msg: Message) => {
 					msg.delete({timeout: 2000})
@@ -34,8 +38,9 @@ export const instance = new class extends CommandBase {
 				})
 			}
 		} else if (action === 'remove') {
-			if (emojiExists) {
-				await postgre.deleteEmoji(code)
+			if (existingEmoji) {
+				await emojiRepository.remove(existingEmoji)
+
 				message.channel.send(`Emoji :${code}: was successfully deleted!`).then((msg: Message) => {
 					msg.delete({timeout: 2000})
 				})

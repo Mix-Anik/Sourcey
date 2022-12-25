@@ -1,11 +1,13 @@
-import {CommandHandler, postgre} from '../app'
+import {CommandHandler} from '../app'
 import {EventBase} from '../base/EventBase'
 import {Dict} from '../base/Dictionary'
 import {Message, TextChannel} from 'discord.js'
-import config from '../config.json'
 import {CommandBase} from '../base/CommandBase'
 import {hasEmoji, hasRoleById} from '../utils/helpers'
 import {WebhookResource} from '../resources/webhook'
+import {getRepository} from 'typeorm'
+import {Emoji} from '../base/models/emoji.model'
+import {GuildConfigResource} from '../resources/config'
 
 
 const attributes: Dict = new Dict({
@@ -18,10 +20,13 @@ export const instance = new class extends EventBase {
 	async execute(message: Message): Promise<void> {
 		if (!message.member || message.member.user.bot) return
 
-		if (message.content.startsWith(config.General.prefix)) {
-			const regex = /"([^"]*)"|(\S+)/g
-			const allArgs = message.content.slice(config.General.prefix.length).trim()
-			const cmdArgs = (allArgs.match(regex) || []).map(m => m.replace(regex, '$1$2'))
+		const configResource = GuildConfigResource.instance()
+		const guildConfig = configResource.get(message.guild.id).keyValues
+
+		if (message.content.startsWith(guildConfig.General.prefix)) {
+			const regex = /"([^"]*)"|'([^']*)'|(\S+)/g
+			const allArgs = message.content.slice(guildConfig.General.prefix.length).trim()
+			const cmdArgs = (allArgs.match(regex) || []).map(m => m.replace(regex, '$1$2$3'))
 			const cmdName = cmdArgs.shift()!.toLowerCase()
 			const command: CommandBase = CommandHandler.get(cmdName)
 
@@ -37,7 +42,7 @@ export const instance = new class extends EventBase {
 		// Resends message with custom emojis
 		else if (
 			message.channel.type === 'text' &&
-			hasRoleById(message.member, config.Misc.Emoji.roleId) &&
+			hasRoleById(message.member, guildConfig.Modules.MISC.emojiRoleId) &&
 			hasEmoji(message.content)) {
 
 			let modifiedMessage = message.content
@@ -51,10 +56,15 @@ export const instance = new class extends EventBase {
 
 			modifiedMessage.match(codeRegex)?.forEach(async (msg: string) => {
 				const emojiCode = msg.substring(1, msg.length - 1)
-				const customEmoji = await postgre.getEmoji(emojiCode)
-				const webhook = await WebhookResource.instance(<TextChannel> message.channel)
+				const emojiRepository = getRepository(Emoji)
+				const customEmoji = await emojiRepository.findOne({code: emojiCode})
+
+				if (!customEmoji) return
+
+				const fullEmojiCode = `<:${emojiCode}:${customEmoji.snowflake}>`
+				const webhook = await WebhookResource.instance(message.guild.id, <TextChannel> message.channel)
 				const avatar = message.author.avatarURL() ? message.author.avatarURL()! : message.author.defaultAvatarURL
-				response = response.replace(msg, customEmoji)
+				response = response.replace(msg, fullEmojiCode)
 
 				await webhook.edit({
 					channel: message.channel.id

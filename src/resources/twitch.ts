@@ -1,7 +1,8 @@
 import axios, {AxiosRequestConfig} from 'axios'
 import {MessageEmbed, TextChannel} from 'discord.js'
-import {client, postgre} from '../app'
+import {client} from '../app'
 import config from '../config.json'
+import {GuildConfigResource} from './config'
 
 
 export class TwitchResource {
@@ -9,7 +10,7 @@ export class TwitchResource {
 	private readonly clientId: string
 
 	private constructor() {
-		this.clientId = config.Monitoring.twitch.clientId
+		this.clientId = config.Resources.twitch.clientId
 	}
 
 	public static instance() {
@@ -73,9 +74,12 @@ export class TwitchResource {
 	}
 
 	// Checks for twitch users being streaming
-	public listen() {
+	public listen(guildId: string) {
+		const configResource = GuildConfigResource.instance()
+		const guildConfig = configResource.get(guildId).keyValues
+
 		setInterval(async () => {
-			const twitchUsers: any = await postgre.getTwitchUsers()
+			const twitchUsers: any = null// await postgre.getTwitchUsers()
 
 			for (const user of twitchUsers) {
 				const streamInfo: any = await this.getStreamInfo(user.user_id)
@@ -84,10 +88,12 @@ export class TwitchResource {
 				if (streamStatus !== user.stream_status) {
 					if (streamStatus === 'online') {
 						const embed = new MessageEmbed()
-							.setColor(config.Monitoring.twitch.messageColor)
+							.setColor(guildConfig.Modules.MONITORING.embedColor)
 							.setTitle(streamInfo.stream.channel.url)
 							.setURL(streamInfo.stream.channel.url)
-							.setAuthor(streamInfo.stream.channel.display_name + ' is now streaming!', config.Monitoring.twitch.authorImage, streamInfo.stream.channel.url)
+							// TODO: get twitch user avatar link
+							.setAuthor(streamInfo.stream.channel.display_name + ' is now streaming!',
+								'', streamInfo.stream.channel.url)
 							.addField('Description:', streamInfo.stream.channel.status)
 							.addField('Playing:', streamInfo.stream.game, true)
 							.addField('Viewers:', streamInfo.stream.viewers, true)
@@ -95,15 +101,14 @@ export class TwitchResource {
 							.setThumbnail(streamInfo.stream.channel.logo)
 							.setImage(streamInfo.stream.preview.large)
 							.setTimestamp()
-							.setFooter(config.Monitoring.twitch.footerText, config.Monitoring.twitch.footerImage)
 
-						const discordChannel = <TextChannel> client.channels.cache.get(config.Monitoring.twitch.channelId)
+						const discordChannel = <TextChannel> client.channels.cache.get(guildConfig.Modules.MONITORING.twitch.channelId)
 						await discordChannel.send(embed)
 					}
 
-					await postgre.updateTwitchStreamStatus({user_id: user.user_id, stream_status: streamStatus})
+					// await postgre.updateTwitchStreamStatus({user_id: user.user_id, stream_status: streamStatus})
 				}
 			}
-		}, config.Monitoring.twitch.updateTime)
+		}, guildConfig.Modules.MONITORING.twitch.updateTime)
 	}
 }

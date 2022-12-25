@@ -22,7 +22,7 @@ export const instance = new class extends CommandBase {
 
 		for (const member of membersToKick) {
 			if (!member.kickable) {
-				Logger.info(`Unable to kick user: ${member.user.username}`, true)
+				Logger.info(message.guild.id, `Unable to kick user: ${member.user.username}`, true)
 				continue
 			}
 
@@ -32,7 +32,7 @@ export const instance = new class extends CommandBase {
 
 		if (kickedMembers.length) {
 			const authorName = `${message.author.username}#${message.author.discriminator}`
-			Logger.info(`${authorName} has kicked: ${kickedMembers.join(', ')}`, true)
+			Logger.info(message.guild.id,`${authorName} has kicked: ${kickedMembers.join(', ')}`, true)
 		}
 	}
 }(attributes)

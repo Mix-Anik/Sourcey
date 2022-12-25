@@ -1,7 +1,8 @@
 import {CommandBase} from '../../base/CommandBase'
 import {Dict} from '../../base/Dictionary'
 import {Message, MessageEmbed} from 'discord.js'
-import config from '../../config.json'
+import {GuildConfigResource} from '../../resources/config'
+import {CommandModule} from '../../base/interfaces/command'
 
 
 const attributes = new Dict({
@@ -16,12 +17,16 @@ const attributes = new Dict({
 
 export const instance = new class extends CommandBase {
 	execute(message: Message, []: []): void {
-		const moduleNames = Object.keys(config.Modules)
+		const configResource = GuildConfigResource.instance()
+		const guildConfig = configResource.get(message.guild.id).keyValues
+		const moduleNames = Object.keys(guildConfig.Modules)
 
 		if (moduleNames.length) {
-			const description = moduleNames.map(mn => `**${mn}** ${config.Modules[mn] === 'ON' ? '✅' : '❌'}`)
+			const description = moduleNames.map(
+				(mn: CommandModule) => `**${mn}** ${guildConfig.Modules[mn].enabled ? '✅' : '❌'}`
+			)
 			const embed = new MessageEmbed()
-				.setColor('#aaaaaa')
+				.setColor(guildConfig.Modules.COMMON.embedColor)
 				.setDescription(description)
 
 			message.channel.send(embed)

@@ -41,12 +41,13 @@ export const instance = new class extends CommandBase {
 
 		for (const channel of channelsToClean) {
 			channel.bulkDelete(deleteAmount, true)
-				.then(msgs => Logger.info(`${author} bulk deleted ${msgs.size} messages in #${channel.name}`))
-				.catch(res => {
+				.then(msgs =>
+					Logger.info(message.guild.id, `${author} bulk deleted ${msgs.size} messages in #${channel.name}`)
+				).catch(res => {
 					if (res.httpStatus && res.httpStatus === 400)
 						message.channel.send(`Unfortunately it is not possible to delete messages older than 2 weeks`)
 					else
-						Logger.error(`${res} (in #${channel.name})`, true)
+						Logger.error(message.guild.id, `${res} (in #${channel.name})`, true)
 				})
 		}
 	}
